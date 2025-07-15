@@ -1,19 +1,29 @@
 # Twitter Tag Scraper - #UnlockRitual
 
-A web application for scraping and managing tweets with the #UnlockRitual hashtag, featuring AI-powered bilingual rewriting capabilities.
+A web application displaying real Twitter tweets with the #UnlockRitual hashtag, featuring AI-powered bilingual rewriting capabilities.
 
 ## Features
 
-- 🔍 Real-time tweet scraping from Twitter
-- 📊 Comprehensive statistics dashboard
-- 🎯 Advanced filtering options (engagement levels, media, verified users)
+- ✅ **100% Real Twitter Data** - No simulated or fake tweets
+- 🔍 Real tweet IDs that link to actual Twitter pages
+- 📊 Real-time statistics from actual tweets
+- 🎯 Filter by verified users and media content
 - 🤖 AI-powered tweet rewriting (Chinese/English)
-- 💾 Data export functionality
+- 💾 Export real tweet data
 - 📱 Responsive design for all devices
 
 ## Live Demo
 
 Visit the live application: [Coming soon on Vercel]
+
+## Real Tweet Data
+
+This application now uses only real tweets scraped from Twitter. Each tweet includes:
+- Actual Twitter status IDs
+- Real usernames and display names
+- Verified account badges
+- View counts, likes, retweets, and replies
+- Direct links to original tweets on Twitter
 
 ## Technologies Used
 
