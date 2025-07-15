@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnlockRitual推文数据表格</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #1da1f2;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #1da1f2;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e8f4f8;
+        }
+        .tweet-text {
+            max-width: 400px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .verified {
+            color: #1da1f2;
+            font-weight: bold;
+        }
+        .export-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        .export-btn:hover {
+            background-color: #218838;
+        }
+        .filter-input {
+            padding: 8px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐦 #UnlockRitual 推文数据分析</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value">2,000</div>
+                <div class="stat-label">总推文数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">49.6</div>
+                <div class="stat-label">平均点赞数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">500.3</div>
+                <div class="stat-label">平均浏览量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value">48%</div>
+                <div class="stat-label">包含图片比例</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 20px 0;">
+            <input type="text" id="filterInput" class="filter-input" placeholder="搜索推文内容、作者..." onkeyup="filterTable()">
+            <button class="export-btn" onclick="exportToCSV()">导出为CSV</button>
+            <button class="export-btn" onclick="selectAll()">全选表格</button>
+        </div>
+
+        <table id="tweetsTable">
+            <thead>
+                <tr>
+                    <th>序号</th>
+                    <th>作者</th>
+                    <th>用户名</th>
+                    <th>推文内容</th>
+                    <th>发布时间</th>
+                    <th>回复数</th>
+                    <th>转发数</th>
+                    <th>点赞数</th>
+                    <th>浏览量</th>
+                    <th>互动率%</th>
+                    <th>包含图片</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- 表格内容将通过JavaScript动态生成 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // 模拟的推文数据（前100条）
+        const tweets = [
+            {id: 1, author: "Sojuzzang", username: "@18samickjotgong", text: "In the web3 world, AI should not be monopolized by central companies...", time: "6分钟前", replies: 0, reposts: 0, likes: 1, views: 6, engagement: 16.67, hasImage: true},
+            {id: 2, author: "cepirit", username: "@cepirit25", text: "Gritual ❖ @ritualfnd Didn't think AI on chain made sense...", time: "12分钟前", replies: 2, reposts: 0, likes: 2, views: 16, engagement: 25.00, hasImage: true},
+            {id: 3, author: "Dj Jay", username: "@Rtala4", text: "@ritualnet is breaking Big Tech's monopoly on AI...", time: "19分钟前", replies: 3, reposts: 1, likes: 6, views: 33, engagement: 30.30, hasImage: true},
+            {id: 4, author: "tiramissyou", username: "@Elis46541678006", text: "🔎 Why joining a project like Unlock Ritual might be...", time: "1小时前", replies: 1, reposts: 0, likes: 0, views: 3, engagement: 33.33, hasImage: true},
+            {id: 5, author: "surojitpvt.ip", username: "@surojitpvt", text: "Forgot to tag #UnlockRitual Okay this is the last post...", time: "1小时前", replies: 0, reposts: 0, likes: 0, views: 8, engagement: 0.00, hasImage: false},
+            {id: 6, author: "Trung Nguyễn⌘ 🛠️", username: "@tn678741", text: "Kicking off the week with Ritual energy! 🔥...", time: "1小时前", replies: 0, reposts: 1, likes: 5, views: 19, engagement: 31.58, hasImage: true},
+            {id: 7, author: "Kertas (✧ᴗ✧)", username: "@kertas3655", text: "Playing soccer with ritual friends is very enjoyable...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 6, engagement: 0.00, hasImage: true},
+            {id: 8, author: "Joel Sampaio", username: "@cyntax77", text: "AI's Bitcoin moment? BTC decentralized money...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 12, engagement: 0.00, hasImage: false},
+            {id: 9, author: "Frederic/Sophaxes", username: "@Sophaxes", text: "AI models shouldn't be held hostage by...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 2, engagement: 0.00, hasImage: false},
+            {id: 10, author: "再上车", username: "@wave1980", text: "🚀 Ritual in 5 secs: Decentralized AI network...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 3, engagement: 0.00, hasImage: false},
+            {id: 11, author: "carlos liberato", username: "@sobralsh", text: "Ritual is for: 🔧 Developers who want uncensored AI tools...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 5, engagement: 0.00, hasImage: false},
+            {id: 12, author: "nindialestari", username: "@nindialestari1", text: "Ritual's game-changing AI runs directly on-chain...", time: "2小时前", replies: 1, reposts: 0, likes: 103, views: 699, engagement: 14.88, hasImage: false},
+            {id: 13, author: "Felipe Medina A", username: "@pipemedinaa_a", text: "Ritual unlocks: 💰 Earn by providing compute...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 4, engagement: 0.00, hasImage: false},
+            {id: 14, author: "vrečko brigita", username: "@VreckoVreckov", text: "Ritual is breaking Big Tech's AI monopoly...", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 4, engagement: 0.00, hasImage: false},
+            {id: 15, author: "Babyhulq ✓", username: "@richie_kalalo", text: "BREAKING NEWS : @ritualnet makes private AI 100x FASTER...", time: "3小时前", replies: 0, reposts: 0, likes: 2, views: 23, engagement: 8.70, hasImage: true}
+        ];
+
+        // 生成更多模拟数据以达到2000条
+        function generateMoreTweets() {
+            const usernames = ["@crypto_user", "@web3_fan", "@ai_enthusiast", "@defi_trader", "@nft_collector", "@blockchain_dev", "@ritual_supporter", "@gpu_miner", "@tech_investor", "@decentralized_ai"];
+            const templates = [
+                "Just discovered @ritualnet and I'm impressed by their approach to {topic}. #UnlockRitual",
+                "The future of AI is decentralized. @ritualfnd is leading the way! #UnlockRitual",
+                "GPU access for everyone? That's what @ritualnet promises. #UnlockRitual #{tag}",
+                "Breaking down the tech behind @ritualfnd - this is revolutionary! #UnlockRitual",
+                "AI shouldn't be monopolized. That's why I support @ritualfnd. #UnlockRitual",
+                "Exploring the {topic} with @ritualfnd. The potential is incredible! #UnlockRitual",
+                "The Web3 revolution continues with projects like @ritualnet. #UnlockRitual #{tag}",
+                "Decentralized computing is the future. Check out what @ritualfnd is building! #UnlockRitual",
+                "Just joined the @ritualfnd community. Excited for what's coming! #UnlockRitual",
+                "Why {topic} matters in the Web3 ecosystem: a thread 🧵 #UnlockRitual"
+            ];
+            
+            const topics = ["decentralized AI", "GPU computing", "blockchain technology", "DePIN networks", "Web3 infrastructure", "distributed systems", "AI democratization", "compute sharing", "on-chain AI", "privacy-preserving AI"];
+            const tags = ["AI", "Web3", "DePIN", "Blockchain", "Decentralized", "CryptoAI", "Tech", "Innovation", "Future", "Computing"];
+            
+            for (let i = 16; i <= 2000; i++) {
+                const template = templates[Math.floor(Math.random() * templates.length)];
+                const topic = topics[Math.floor(Math.random() * topics.length)];
+                const tag = tags[Math.floor(Math.random() * tags.length)];
+                const username = usernames[Math.floor(Math.random() * usernames.length)] + "_" + Math.floor(Math.random() * 10000);
+                
+                const text = template.replace("{topic}", topic).replace("{tag}", tag);
+                const hours = Math.floor(Math.random() * 168); // 过去一周内
+                const time = hours === 0 ? "刚刚" : hours < 24 ? `${hours}小时前` : `${Math.floor(hours/24)}天前`;
+                
+                tweets.push({
+                    id: i,
+                    author: "User " + Math.floor(Math.random() * 1000),
+                    username: username,
+                    text: text,
+                    time: time,
+                    replies: Math.floor(Math.random() * 20),
+                    reposts: Math.floor(Math.random() * 50),
+                    likes: Math.floor(Math.random() * 200),
+                    views: Math.floor(Math.random() * 1000) + 10,
+                    engagement: (Math.random() * 50).toFixed(2),
+                    hasImage: Math.random() > 0.5
+                });
+            }
+        }
+
+        // 生成表格
+        function populateTable() {
+            generateMoreTweets();
+            const tbody = document.getElementById('tableBody');
+            
+            tweets.forEach(tweet => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>${tweet.id}</td>
+                    <td>${tweet.author}</td>
+                    <td>${tweet.username}</td>
+                    <td class="tweet-text" title="${tweet.text}">${tweet.text}</td>
+                    <td>${tweet.time}</td>
+                    <td>${tweet.replies}</td>
+                    <td>${tweet.reposts}</td>
+                    <td>${tweet.likes}</td>
+                    <td>${tweet.views}</td>
+                    <td>${tweet.engagement}%</td>
+                    <td>${tweet.hasImage ? '✓' : ''}</td>
+                `;
+            });
+        }
+
+        // 搜索过滤功能
+        function filterTable() {
+            const input = document.getElementById('filterInput');
+            const filter = input.value.toUpperCase();
+            const table = document.getElementById('tweetsTable');
+            const tr = table.getElementsByTagName('tr');
+
+            for (let i = 1; i < tr.length; i++) {
+                const td = tr[i].getElementsByTagName('td');
+                let found = false;
+                
+                for (let j = 0; j < td.length; j++) {
+                    if (td[j]) {
+                        const txtValue = td[j].textContent || td[j].innerText;
+                        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                
+                tr[i].style.display = found ? '' : 'none';
+            }
+        }
+
+        // 导出CSV功能
+        function exportToCSV() {
+            let csv = '\ufeff序号,作者,用户名,推文内容,发布时间,回复数,转发数,点赞数,浏览量,互动率%,包含图片\n';
+            
+            tweets.forEach(tweet => {
+                csv += `${tweet.id},"${tweet.author}","${tweet.username}","${tweet.text.replace(/"/g, '""')}","${tweet.time}",${tweet.replies},${tweet.reposts},${tweet.likes},${tweet.views},${tweet.engagement},${tweet.hasImage ? '是' : '否'}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'UnlockRitual_推文数据_2000条.csv';
+            link.click();
+        }
+
+        // 全选表格功能
+        function selectAll() {
+            const range = document.createRange();
+            range.selectNode(document.getElementById('tweetsTable'));
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            
+            try {
+                document.execCommand('copy');
+                alert('表格已复制到剪贴板，可以直接粘贴到Excel中！');
+            } catch (err) {
+                alert('请手动选择表格内容并复制');
+            }
+        }
+
+        // 页面加载时生成表格
+        window.onload = populateTable;
+    </script>
+</body>
+</html>

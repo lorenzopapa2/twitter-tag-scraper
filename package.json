@@ -1,0 +1,21 @@
+{
+  "name": "twitter-tag-scraper",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "scrape-once": "node index.js --once",
+    "start:puppeteer": "node puppeteer-index.js",
+    "scrape-once:puppeteer": "node puppeteer-index.js --once",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.0",
+    "puppeteer": "^24.12.1"
+  }
+}

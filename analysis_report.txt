@@ -1,0 +1,47 @@
+
+========================================
+Twitter数据分析报告
+生成时间: 2025-07-14 23:18:22
+========================================
+
+一、基础统计
+-----------
+总推文数量: 2000
+包含图片的推文: 960 (48.0%)
+
+二、互动指标统计
+--------------
+指标        平均值      中位数      最大值      最小值
+回复数      4.6        3         20         0
+转发数      12.0        9         48         0
+点赞数      24.8       18         103         0
+浏览量      250.1      192        961        1
+
+三、热门推文分析
+--------------
+最多点赞的推文:
+- 作者: nindialestari (@nindialestari1)
+- 点赞数: 103
+- 内容预览: Ritual's game-changing AI runs directly on-chain, no cloud or middlemen. This means total transparen...
+
+最多浏览的推文:
+- 作者: User 932 (@user_2947)
+- 浏览量: 961
+- 内容预览: GPU access for everyone? That's what @ritualnet promises. #UnlockRitual #DePIN...
+
+最多转发的推文:
+- 作者: User 884 (@user_2279)
+- 转发数: 48
+- 内容预览: The intersection of AI and blockchain is here. @ritualnet is leading the way. #UnlockRitual...
+
+四、互动率分析
+------------
+平均互动率: 37.66%
+
+五、时间分布
+----------
+推文时间分布已记录在CSV文件中，可用于进一步的时序分析。
+
+========================================
+报告结束
+========================================

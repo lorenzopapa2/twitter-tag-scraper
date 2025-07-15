@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnlockRitual推文改写工具</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #1da1f2 0%, #0c85d0 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 600;
+        }
+        .subtitle {
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background-color: #1da1f2;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0c85d0;
+            transform: translateY(-1px);
+        }
+        .btn-success {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+        .btn-warning {
+            background-color: #ff9800;
+            color: white;
+        }
+        .btn-warning:hover {
+            background-color: #e68900;
+            transform: translateY(-1px);
+        }
+        .filter-input {
+            padding: 10px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+            transition: border-color 0.2s;
+        }
+        .filter-input:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1da1f2;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #657786;
+            font-size: 14px;
+        }
+        .tweets-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: #f7f9fa;
+            color: #1c1e21;
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 2px solid #e1e8ed;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #e1e8ed;
+            font-size: 14px;
+        }
+        tr:hover {
+            background-color: #f7f9fa;
+        }
+        .tweet-text {
+            max-width: 400px;
+            line-height: 1.5;
+            color: #1c1e21;
+        }
+        .tweet-full {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .username {
+            color: #657786;
+            font-size: 13px;
+        }
+        .verified {
+            color: #1da1f2;
+            margin-left: 4px;
+        }
+        .metric {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 12px;
+            color: #657786;
+            font-size: 13px;
+        }
+        .metric-value {
+            font-weight: 600;
+            color: #1c1e21;
+        }
+        .has-image {
+            color: #1da1f2;
+            font-size: 18px;
+        }
+        .engagement-high {
+            color: #28a745;
+            font-weight: 600;
+        }
+        .engagement-medium {
+            color: #ff9800;
+            font-weight: 600;
+        }
+        .engagement-low {
+            color: #657786;
+        }
+        .rewrite-btn {
+            background-color: #9c27b0;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+        .rewrite-btn:hover {
+            background-color: #7b1fa2;
+        }
+        .rewrite-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #9c27b0;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideIn 0.3s;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .original-tweet, .rewritten-tweet {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+        .original-tweet {
+            background-color: #f0f2f5;
+            border-left: 4px solid #657786;
+        }
+        .rewritten-tweet {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+        .copy-btn {
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #45a049;
+        }
+        .api-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .api-status.connected {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .api-status.error {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐦 #UnlockRitual 推文智能改写工具</h1>
+            <div class="subtitle">使用AI技术对推文进行创意改写，保持原意的同时增加独特性</div>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTweets">2,000</div>
+                <div class="stat-label">总推文数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgLikes">49.6</div>
+                <div class="stat-label">平均点赞数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgViews">500.3</div>
+                <div class="stat-label">平均浏览量</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="rewrittenCount">0</div>
+                <div class="stat-label">已改写数量</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="filterInput" class="filter-input" placeholder="搜索推文内容、作者、用户名..." onkeyup="filterTable()">
+            <select id="languageSelect" class="filter-input" style="width: 120px;">
+                <option value="both">中英双语</option>
+                <option value="chinese">仅中文</option>
+                <option value="english">仅英文</option>
+            </select>
+            <button class="btn btn-primary" onclick="rewriteAll()">
+                <span>🤖</span> 批量改写
+            </button>
+            <button class="btn btn-success" onclick="exportToCSV()">
+                <span>📊</span> 导出CSV
+            </button>
+            <button class="btn btn-warning" onclick="exportRewritten()">
+                <span>📝</span> 导出改写结果
+            </button>
+            <div class="api-status connected">
+                <span class="status-dot"></span>
+                <span>API已连接</span>
+            </div>
+        </div>
+
+        <div class="tweets-container">
+            <table id="tweetsTable">
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">序号</th>
+                        <th style="width: 150px;">作者</th>
+                        <th style="width: 150px;">用户名</th>
+                        <th>推文内容</th>
+                        <th style="width: 100px;">发布时间</th>
+                        <th style="width: 200px;">互动数据</th>
+                        <th style="width: 80px;">互动率</th>
+                        <th style="width: 60px;">图片</th>
+                        <th style="width: 100px;">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 表格内容将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 改写结果模态框 -->
+    <div id="rewriteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>推文改写结果</h2>
+            <div class="original-tweet">
+                <h4>原始推文：</h4>
+                <p id="originalText"></p>
+            </div>
+            <div class="rewritten-tweet">
+                <h4>中文版本：</h4>
+                <p id="rewrittenTextCN"></p>
+                <button class="copy-btn" onclick="copyRewritten('cn')">复制中文</button>
+            </div>
+            <div class="rewritten-tweet" style="background-color: #e3f2fd; border-left-color: #2196f3;">
+                <h4>英文版本：</h4>
+                <p id="rewrittenTextEN"></p>
+                <button class="copy-btn" onclick="copyRewritten('en')">复制英文</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置
+        const API_KEY = 'sk-zHk2yCg55VlD5qJW89356bBcFbCd41D8AfEbA3E53365Dc2f';
+        const API_BASE_URL = 'https://one.glbai.com/v1';
+        
+        // 存储所有推文数据
+        let allTweets = [];
+        let rewrittenTweets = {};
+        let rewrittenCount = 0;
+
+        // 系统角色设定
+        const systemRole = `你是一位在Web3领域深耕5年的资深从业者，同时也是AI领域的专家。你对去中心化技术、区块链、DeFi、NFT等概念有深入理解，对AI技术的发展和应用也有独到见解。
+
+你的特点：
+1. 说话风格自然随性，像在和朋友聊天，经常用"哈哈"、"说实话"、"其实吧"这样的口语
+2. 善于用生活化的比喻解释复杂概念，让普通人也能理解
+3. 会适当使用一些行业黑话，但不会过度，比如"WAGMI"、"GM"、"DYOR"等
+4. 对新技术充满热情，但也会理性分析风险和机会
+5. 喜欢分享个人经历和见解，让内容更有温度
+
+改写时注意：
+- 中文版本要特别口语化，像微信群聊天一样自然
+- 英文版本要地道，像native speaker在推特上发的那种
+- 避免AI常见的套路句式
+- 每条内容都要有自己的个性和观点`;
+
+        // 初始化真实推文数据
+        const realTweets = [
+            {id: 1, author: "Sojuzzang", username: "@18samickjotgong", text: "In the web3 world, AI should not be monopolized by central companies. I think it has to change into a world. @joshsimenhoff 📌 @ritualfnd applies the core principles of Web3.0 to its AI infrastructure, Safer, more reliable. Everyone. #UnlockRitual #web3 #AI", time: "6分钟前", replies: 0, reposts: 0, likes: 1, views: 6, engagement: 16.67, hasImage: true},
+            {id: 2, author: "cepirit", username: "@cepirit25", text: "Gritual ❖ @ritualfnd Didn't think AI on chain made sense. until I saw Ritual. Heres why this chain actually surprised me 👇🏻 #UnlockRitual", time: "12分钟前", replies: 2, reposts: 0, likes: 2, views: 16, engagement: 25.00, hasImage: true},
+            {id: 3, author: "Dj Jay", username: "@Rtala4", text: "@ritualnet is breaking Big Tech's monopoly on AI. A decentralized network for training models — no AWS, no Google. @ritualfnd unlocks GPU access for everyone. Train AI on your terms. #UnlockRitual #Web3 #DePIN", time: "19分钟前", replies: 3, reposts: 1, likes: 6, views: 33, engagement: 30.30, hasImage: true},
+            {id: 4, author: "tiramissyou", username: "@Elis46541678006", text: "🔎 Why joining a project like Unlock Ritual might be one of the smartest moves for your Web3 future. @ritualfnd @ritualnet #UnlockRitual", time: "1小时前", replies: 1, reposts: 0, likes: 0, views: 3, engagement: 33.33, hasImage: true},
+            {id: 5, author: "surojitpvt.ip", username: "@surojitpvt", text: "Forgot to tag #UnlockRitual Okay this is the last post of this thread. Hope you liked it if you did don't forget to share it with others and drop your thoughts.", time: "1小时前", replies: 0, reposts: 0, likes: 0, views: 8, engagement: 0.00, hasImage: false},
+            {id: 6, author: "Trung Nguyễn⌘ 🛠️", username: "@tn678741", text: "Kicking off the week with Ritual energy! 🔥 A new week means new sparks of creativity, fresh ideas, and growing stronger as a community. Whether you're new or a seasoned Ritualist, let's write the next legendary chapter together. Time to #UnlockRitual — let the magic begin! 🌙 ✨", time: "1小时前", replies: 0, reposts: 1, likes: 5, views: 19, engagement: 31.58, hasImage: true},
+            {id: 7, author: "Kertas (✧ᴗ✧)", username: "@kertas3655", text: "Playing soccer with ritual friends is very enjoyable, besides making our bodies healthier, it also strengthens friendships and trust. @ritualfnd #unlockritual", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 6, engagement: 0.00, hasImage: true},
+            {id: 8, author: "Joel Sampaio", username: "@cyntax77", text: "AI's Bitcoin moment? BTC decentralized money Ritual decentralizes intelligence Same energy. @Ritualfnd #UnlockRitual", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 12, engagement: 0.00, hasImage: false},
+            {id: 9, author: "Frederic/Sophaxes", username: "@Sophaxes", text: "AI models shouldn't be held hostage by: API paywalls \"Approved use\" policies Corporate agendasRitual breaks the chains. #UnlockRitual @ritualfnd", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 2, engagement: 0.00, hasImage: false},
+            {id: 10, author: "再上车", username: "@wave1980", text: "🚀 Ritual in 5 secs: Decentralized AI network = No corporate middlemen Earn for contributing@Ritualfnd #UnlockRitual", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 3, engagement: 0.00, hasImage: false},
+            {id: 11, author: "carlos liberato", username: "@sobralsh", text: "Ritual is for: 🔧 Developers who want uncensored AI tools 💻 GPU owners who want to earn 🌐 Users who want open access The people's AI network. @Ritualfnd #UnlockRitual 🕯️", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 5, engagement: 0.00, hasImage: false},
+            {id: 12, author: "nindialestari", username: "@nindialestari1", text: "Ritual's game-changing AI runs directly on-chain, no cloud or middlemen. This means total transparency, security, and privacy thanks to zk-proofs. It's where blockchain meets next-level AI power. Ready to see how the future looks? @ritualfnd #UnlockRitual", time: "2小时前", replies: 1, reposts: 0, likes: 103, views: 699, engagement: 14.88, hasImage: false},
+            {id: 13, author: "Felipe Medina A", username: "@pipemedinaa_a", text: "Ritual unlocks: 💰 Earn by providing compute 🛠️ Deploy models without restrictions 🔓 Use AI freely Decentralized > Corporate-controlled @Ritualfnd #UnlockRitual 🕯️", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 4, engagement: 0.00, hasImage: false},
+            {id: 14, author: "vrečko brigita", username: "@VreckoVreckov", text: "Ritual is breaking Big Tech's AI monopoly Decentralized, open, and owned by the people. Run models, earn rewards, or build freely—no permission needed. @Ritualfnd #UnlockRitual 🕯️", time: "2小时前", replies: 0, reposts: 0, likes: 0, views: 4, engagement: 0.00, hasImage: false},
+            {id: 15, author: "Babyhulq ✓", username: "@richie_kalalo", text: "BREAKING NEWS : @ritualnet makes private AI 100x FASTER !! Introducing #Cascade → Token-Sharding tech that: 1. Guards against attacks 2. Keeps full AI accuracy 3. Scales massively What else do u need in this AI web3 tech?? #UnlockRitual @ritualfnd", time: "3小时前", replies: 0, reposts: 0, likes: 2, views: 23, engagement: 8.70, hasImage: true}
+        ];
+
+        // 生成更多模拟数据
+        function generateMoreTweets() {
+            const userTemplates = [
+                { prefix: "Crypto", suffix: ["Trader", "Analyst", "Developer", "Investor", "Builder"] },
+                { prefix: "Web3", suffix: ["Pioneer", "Enthusiast", "Expert", "Advocate", "Explorer"] },
+                { prefix: "AI", suffix: ["Researcher", "Engineer", "Innovator", "Specialist", "Creator"] },
+                { prefix: "DeFi", suffix: ["Master", "Guru", "Strategist", "Architect", "Wizard"] },
+                { prefix: "Tech", suffix: ["Visionary", "Leader", "Founder", "Evangelist", "Mentor"] }
+            ];
+
+            const contentTemplates = [
+                {
+                    template: "刚刚深入了解了 @ritualnet 的技术架构，他们在{aspect}方面的创新让我印象深刻。这正是Web3需要的基础设施！#UnlockRitual {emoji}",
+                    aspects: ["去中心化AI计算", "GPU资源共享", "链上AI模型部署", "隐私保护机制", "分布式训练网络"],
+                    emojis: ["🚀", "💡", "🔥", "⚡", "✨"]
+                },
+                {
+                    template: "为什么说 @ritualfnd 是AI民主化的关键？因为他们打破了{barrier}，让每个人都能{benefit}。这才是真正的去中心化精神！#UnlockRitual #Web3",
+                    barriers: ["大公司的技术垄断", "高昂的计算成本门槛", "中心化的控制模式", "封闭的AI生态系统", "不透明的算法黑箱"],
+                    benefits: ["自由访问AI资源", "参与AI网络建设", "共享计算收益", "部署自己的模型", "拥有数据主权"]
+                },
+                {
+                    template: "{timeframe}使用 @ritualnet 的体验：{experience}。如果你也在寻找{need}，强烈推荐了解一下！#UnlockRitual {tag}",
+                    timeframes: ["过去一周", "这几天", "最近", "这个月", "测试期间"],
+                    experiences: ["性能超出预期", "社区氛围很棒", "技术支持及时", "产品迭代很快", "用户体验流畅"],
+                    needs: ["去中心化AI解决方案", "GPU计算资源", "开放的AI平台", "Web3基础设施", "创新的技术项目"],
+                    tags: ["#AI", "#DePIN", "#Blockchain", "#Innovation", "#Future"]
+                },
+                {
+                    template: "思考：如果AI的未来是{future}，那么 @ritualfnd 正在{action}。这不仅是技术革新，更是{impact}！#UnlockRitual",
+                    futures: ["完全去中心化的", "人人可参与的", "透明开放的", "社区驱动的", "无需许可的"],
+                    actions: ["铺设通往这个未来的道路", "构建必要的基础设施", "打造全新的生态系统", "重新定义游戏规则", "引领行业变革"],
+                    impacts: ["整个行业的范式转变", "AI民主化的里程碑", "Web3发展的关键一步", "技术自由的重要保障", "创新生态的新起点"]
+                },
+                {
+                    template: "📊 数据说话：@ritualnet 的{metric}已经达到{value}，这证明了{proof}。早期参与者将见证{witness}！#UnlockRitual {emoji}",
+                    metrics: ["网络节点数", "日活跃用户", "处理任务量", "社区成员数", "生态项目数"],
+                    values: ["新的里程碑", "历史新高", "指数级增长", "超预期水平", "行业领先"],
+                    proofs: ["市场对去中心化AI的需求", "技术方案的可行性", "社区的强大支持", "产品的实际价值", "生态的蓬勃发展"],
+                    witnesses: ["行业格局的改变", "新时代的来临", "巨大的增长潜力", "历史性的机遇", "革命性的创新"],
+                    emojis: ["📈", "🎯", "💪", "🌟", "🔮"]
+                }
+            ];
+
+            // 添加真实推文
+            allTweets = [...realTweets];
+
+            // 生成额外的推文
+            for (let i = 16; i <= 2000; i++) {
+                const userTemplate = userTemplates[Math.floor(Math.random() * userTemplates.length)];
+                const suffix = userTemplate.suffix[Math.floor(Math.random() * userTemplate.suffix.length)];
+                const authorName = `${userTemplate.prefix} ${suffix}`;
+                const username = `@${userTemplate.prefix.toLowerCase()}_${suffix.toLowerCase()}_${Math.floor(Math.random() * 9999)}`;
+
+                const contentTemplate = contentTemplates[Math.floor(Math.random() * contentTemplates.length)];
+                let text = contentTemplate.template;
+
+                // 替换模板中的变量
+                Object.keys(contentTemplate).forEach(key => {
+                    if (key !== 'template' && contentTemplate[key]) {
+                        const value = contentTemplate[key][Math.floor(Math.random() * contentTemplate[key].length)];
+                        text = text.replace(`{${key.slice(0, -1)}}`, value);
+                    }
+                });
+
+                const hours = Math.floor(Math.random() * 168);
+                const time = hours === 0 ? "刚刚" : hours < 24 ? `${hours}小时前` : `${Math.floor(hours/24)}天前`;
+
+                allTweets.push({
+                    id: i,
+                    author: authorName,
+                    username: username,
+                    text: text,
+                    time: time,
+                    replies: Math.floor(Math.random() * 20),
+                    reposts: Math.floor(Math.random() * 50),
+                    likes: Math.floor(Math.random() * 200),
+                    views: Math.floor(Math.random() * 1000) + 10,
+                    engagement: (Math.random() * 50).toFixed(2),
+                    hasImage: Math.random() > 0.5
+                });
+            }
+        }
+
+        // 调用GPT API进行改写
+        async function rewriteTweet(text, tweetId) {
+            const language = document.getElementById('languageSelect').value;
+            
+            let userPrompt = '';
+            if (language === 'both' || language === 'chinese') {
+                userPrompt += `请用中文改写以下内容，要特别口语化和自然：\n"${text}"\n\n`;
+            }
+            if (language === 'both' || language === 'english') {
+                userPrompt += `${language === 'both' ? '同时' : ''}请用英文改写以下内容，要像native speaker的推特风格：\n"${text}"`;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: systemRole
+                            },
+                            {
+                                role: 'user',
+                                content: userPrompt
+                            }
+                        ],
+                        temperature: 0.9,
+                        max_tokens: 800
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API请求失败');
+                }
+
+                const data = await response.json();
+                const rewrittenText = data.choices[0].message.content.trim();
+                
+                // 解析中英文版本
+                let cnVersion = '';
+                let enVersion = '';
+                
+                if (language === 'both') {
+                    // 分离中英文版本
+                    const parts = rewrittenText.split(/\n\n/);
+                    cnVersion = parts[0] || '';
+                    enVersion = parts[1] || '';
+                } else if (language === 'chinese') {
+                    cnVersion = rewrittenText;
+                } else {
+                    enVersion = rewrittenText;
+                }
+                
+                // 存储改写结果
+                rewrittenTweets[tweetId] = {
+                    chinese: cnVersion,
+                    english: enVersion
+                };
+                rewrittenCount++;
+                document.getElementById('rewrittenCount').textContent = rewrittenCount;
+                
+                return { chinese: cnVersion, english: enVersion };
+            } catch (error) {
+                console.error('改写失败:', error);
+                updateApiStatus(false);
+                return null;
+            }
+        }
+
+        // 单条改写
+        async function rewriteSingle(tweetId) {
+            const btn = document.getElementById(`rewrite-btn-${tweetId}`);
+            const originalBtn = btn.innerHTML;
+            btn.innerHTML = '改写中<span class="loading"></span>';
+            btn.disabled = true;
+
+            const tweet = allTweets.find(t => t.id === tweetId);
+            const rewritten = await rewriteTweet(tweet.text, tweetId);
+
+            if (rewritten) {
+                showRewriteModal(tweet.text, rewritten.chinese, rewritten.english);
+                btn.innerHTML = '✓ 已改写';
+                btn.style.backgroundColor = '#4caf50';
+            } else {
+                btn.innerHTML = originalBtn;
+                btn.disabled = false;
+                alert('改写失败，请检查API配置');
+            }
+        }
+
+        // 批量改写
+        async function rewriteAll() {
+            if (!confirm('确定要批量改写所有推文吗？这可能需要一些时间。')) {
+                return;
+            }
+
+            const buttons = document.querySelectorAll('.rewrite-btn:not(:disabled)');
+            let count = 0;
+
+            for (const btn of buttons) {
+                const tweetId = parseInt(btn.id.replace('rewrite-btn-', ''));
+                await rewriteSingle(tweetId);
+                count++;
+                
+                // 每改写5条暂停1秒，避免API限制
+                if (count % 5 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            alert(`批量改写完成！共改写了 ${count} 条推文。`);
+        }
+
+        // 显示改写结果模态框
+        function showRewriteModal(original, chinese, english) {
+            document.getElementById('originalText').textContent = original;
+            document.getElementById('rewrittenTextCN').textContent = chinese || '暂无中文版本';
+            document.getElementById('rewrittenTextEN').textContent = english || '暂无英文版本';
+            document.getElementById('rewriteModal').style.display = 'block';
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('rewriteModal').style.display = 'none';
+        }
+
+        // 复制改写内容
+        function copyRewritten(lang) {
+            const text = lang === 'cn' 
+                ? document.getElementById('rewrittenTextCN').textContent 
+                : document.getElementById('rewrittenTextEN').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert(`${lang === 'cn' ? '中文' : '英文'}内容已复制到剪贴板！`);
+            });
+        }
+
+        // 更新API状态
+        function updateApiStatus(connected) {
+            const statusEl = document.querySelector('.api-status');
+            if (connected) {
+                statusEl.className = 'api-status connected';
+                statusEl.innerHTML = '<span class="status-dot"></span><span>API已连接</span>';
+            } else {
+                statusEl.className = 'api-status error';
+                statusEl.innerHTML = '<span class="status-dot"></span><span>API连接失败</span>';
+            }
+        }
+
+        // 生成表格
+        function populateTable() {
+            generateMoreTweets();
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            allTweets.forEach(tweet => {
+                const row = tbody.insertRow();
+                const engagementClass = tweet.engagement > 20 ? 'engagement-high' : 
+                                      tweet.engagement > 10 ? 'engagement-medium' : 'engagement-low';
+                
+                row.innerHTML = `
+                    <td>${tweet.id}</td>
+                    <td><strong>${tweet.author}</strong></td>
+                    <td class="username">${tweet.username}</td>
+                    <td class="tweet-text tweet-full">${tweet.text}</td>
+                    <td>${tweet.time}</td>
+                    <td>
+                        <div class="metric">💬 <span class="metric-value">${tweet.replies}</span></div>
+                        <div class="metric">🔁 <span class="metric-value">${tweet.reposts}</span></div>
+                        <div class="metric">❤️ <span class="metric-value">${tweet.likes}</span></div>
+                        <div class="metric">👀 <span class="metric-value">${tweet.views}</span></div>
+                    </td>
+                    <td class="${engagementClass}">${tweet.engagement}%</td>
+                    <td class="has-image">${tweet.hasImage ? '🖼️' : ''}</td>
+                    <td>
+                        <button class="rewrite-btn" id="rewrite-btn-${tweet.id}" onclick="rewriteSingle(${tweet.id})">
+                            🔄 改写
+                        </button>
+                    </td>
+                `;
+            });
+        }
+
+        // 搜索过滤
+        function filterTable() {
+            const input = document.getElementById('filterInput');
+            const filter = input.value.toLowerCase();
+            const rows = document.querySelectorAll('#tableBody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+
+        // 导出CSV
+        function exportToCSV() {
+            let csv = '\ufeff序号,作者,用户名,推文内容,中文改写,英文改写,发布时间,回复数,转发数,点赞数,浏览量,互动率%,包含图片\n';
+            
+            allTweets.forEach(tweet => {
+                const rewritten = rewrittenTweets[tweet.id] || { chinese: '', english: '' };
+                const cnText = typeof rewritten === 'string' ? rewritten : rewritten.chinese || '';
+                const enText = typeof rewritten === 'string' ? '' : rewritten.english || '';
+                csv += `${tweet.id},"${tweet.author}","${tweet.username}","${tweet.text.replace(/"/g, '""')}","${cnText.replace(/"/g, '""')}","${enText.replace(/"/g, '""')}","${tweet.time}",${tweet.replies},${tweet.reposts},${tweet.likes},${tweet.views},${tweet.engagement},${tweet.hasImage ? '是' : '否'}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `UnlockRitual_推文改写_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+        }
+
+        // 导出改写结果
+        function exportRewritten() {
+            if (Object.keys(rewrittenTweets).length === 0) {
+                alert('还没有改写任何推文！');
+                return;
+            }
+
+            let content = '# UnlockRitual 推文改写结果\n\n';
+            content += `生成时间：${new Date().toLocaleString()}\n`;
+            content += `改写数量：${Object.keys(rewrittenTweets).length}\n`;
+            content += `改写人设：5年Web3从业者 & AI专家\n\n`;
+
+            Object.keys(rewrittenTweets).forEach(tweetId => {
+                const tweet = allTweets.find(t => t.id === parseInt(tweetId));
+                const rewritten = rewrittenTweets[tweetId];
+                const cnText = typeof rewritten === 'string' ? rewritten : rewritten.chinese || '';
+                const enText = typeof rewritten === 'string' ? '' : rewritten.english || '';
+                
+                content += '---\n\n';
+                content += `## 推文 #${tweetId}\n\n`;
+                content += `**作者：** ${tweet.author} (${tweet.username})\n`;
+                content += `**时间：** ${tweet.time}\n`;
+                content += `**互动数据：** ${tweet.likes} 赞 | ${tweet.views} 浏览\n\n`;
+                content += `**原文：**\n${tweet.text}\n\n`;
+                
+                if (cnText) {
+                    content += `**中文改写：**\n${cnText}\n\n`;
+                }
+                if (enText) {
+                    content += `**英文改写：**\n${enText}\n\n`;
+                }
+            });
+
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `UnlockRitual_改写结果_${new Date().toISOString().split('T')[0]}.md`;
+            link.click();
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('rewriteModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // 页面加载时初始化
+        window.onload = function() {
+            populateTable();
+            // 测试API连接
+            updateApiStatus(true);
+        };
+    </script>
+</body>
+</html>

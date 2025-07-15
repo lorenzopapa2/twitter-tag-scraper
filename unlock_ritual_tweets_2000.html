@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>#UnlockRitual 推文数据管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f7f9fa;
+            color: #14171a;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1da1f2 0%, #0c85d0 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 24px rgba(29, 161, 242, 0.2);
+        }
+
+        .header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header .subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            color: #1da1f2;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #657786;
+            font-weight: 500;
+        }
+
+        .controls {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .controls-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 24px;
+            font-size: 15px;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+
+        .filter-select {
+            padding: 12px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 24px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 24px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: #1da1f2;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0c85d0;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: #17bf63;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #15a854;
+        }
+
+        .btn-warning {
+            background-color: #ffad1f;
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #f59e0b;
+        }
+
+        .tweets-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .tweet-card {
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            transition: background-color 0.2s;
+        }
+
+        .tweet-card:hover {
+            background-color: #f7f9fa;
+        }
+
+        .tweet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .tweet-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .author-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .author-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .author-name {
+            font-weight: 700;
+            font-size: 16px;
+            color: #14171a;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .verified-badge {
+            color: #1da1f2;
+            font-size: 16px;
+        }
+
+        .author-username {
+            color: #657786;
+            font-size: 14px;
+        }
+
+        .tweet-time {
+            color: #657786;
+            font-size: 14px;
+        }
+
+        .tweet-content {
+            margin-bottom: 16px;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #14171a;
+            word-wrap: break-word;
+        }
+
+        .tweet-content .hashtag {
+            color: #1da1f2;
+            font-weight: 500;
+        }
+
+        .tweet-content .mention {
+            color: #1da1f2;
+        }
+
+        .tweet-metrics {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+
+        .metric-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #657786;
+            font-size: 14px;
+        }
+
+        .metric-value {
+            font-weight: 600;
+            color: #14171a;
+        }
+
+        .tweet-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 20px;
+            border: 1px solid #e1e8ed;
+            background: white;
+            color: #14171a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-small:hover {
+            background-color: #f7f9fa;
+            border-color: #1da1f2;
+            color: #1da1f2;
+        }
+
+        .btn-rewrite {
+            background-color: #7c3aed;
+            color: white;
+            border: none;
+        }
+
+        .btn-rewrite:hover {
+            background-color: #6d28d9;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
+            background: white;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #e1e8ed;
+            background: white;
+            color: #14171a;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background-color: #f7f9fa;
+            border-color: #1da1f2;
+            color: #1da1f2;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-btn.active {
+            background-color: #1da1f2;
+            color: white;
+            border-color: #1da1f2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background: white;
+            margin: 50px auto;
+            padding: 32px;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #14171a;
+        }
+
+        .close-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: none;
+            font-size: 24px;
+            color: #657786;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+            background-color: #f7f9fa;
+            color: #14171a;
+        }
+
+        .modal-body {
+            margin-bottom: 24px;
+        }
+
+        .modal-section {
+            margin-bottom: 24px;
+        }
+
+        .modal-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #14171a;
+            margin-bottom: 12px;
+        }
+
+        .original-text, .rewritten-text {
+            padding: 16px;
+            border-radius: 12px;
+            background-color: #f7f9fa;
+            border: 1px solid #e1e8ed;
+            font-size: 15px;
+            line-height: 1.5;
+            min-height: 100px;
+        }
+
+        .rewritten-text {
+            background-color: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid #e1e8ed;
+            border-radius: 12px;
+            font-size: 15px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .textarea:focus {
+            outline: none;
+            border-color: #1da1f2;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #1da1f2;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #657786;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 18px;
+        }
+
+        .language-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            border: 1px solid #e1e8ed;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .lang-btn.active {
+            background-color: #1da1f2;
+            color: white;
+            border-color: #1da1f2;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .controls-row {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .search-input {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            .tweet-metrics {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .tweet-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐦 #UnlockRitual 推文数据管理系统</h1>
+            <div class="subtitle">智能管理2000条推文数据，支持搜索、筛选、改写等功能</div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalTweets">2000</div>
+                <div class="stat-label">总推文数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalLikes">0</div>
+                <div class="stat-label">总点赞数</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="avgEngagement">0</div>
+                <div class="stat-label">平均互动率</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="uniqueUsers">0</div>
+                <div class="stat-label">独立用户数</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="controls-row">
+                <input type="text" id="searchInput" class="search-input" placeholder="搜索推文内容、用户名..." onkeyup="filterTweets()">
+                <select id="filterSelect" class="filter-select" onchange="filterTweets()">
+                    <option value="all">所有推文</option>
+                    <option value="high">高互动 (100+赞)</option>
+                    <option value="medium">中互动 (20-100赞)</option>
+                    <option value="low">低互动 (<20赞)</option>
+                    <option value="verified">认证用户</option>
+                    <option value="media">包含媒体</option>
+                </select>
+            </div>
+            <div class="controls-row">
+                <button class="btn btn-primary" onclick="batchRewrite()">
+                    <span>🤖</span> 批量改写
+                </button>
+                <button class="btn btn-success" onclick="exportData()">
+                    <span>📊</span> 导出数据
+                </button>
+                <button class="btn btn-warning" onclick="randomSample()">
+                    <span>🎲</span> 随机抽样
+                </button>
+                <select id="languageSelect" class="filter-select">
+                    <option value="both">中英双语</option>
+                    <option value="chinese">仅中文</option>
+                    <option value="english">仅英文</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="tweets-container" id="tweetsContainer">
+            <!-- 推文将通过JavaScript动态加载 -->
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- 分页控件将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 改写模态框 -->
+    <div id="rewriteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">推文改写</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">原始推文</div>
+                    <div class="original-text" id="originalText"></div>
+                </div>
+                
+                <div class="language-toggle">
+                    <button class="lang-btn active" onclick="switchLanguage('cn')">中文</button>
+                    <button class="lang-btn" onclick="switchLanguage('en')">英文</button>
+                    <button class="lang-btn" onclick="switchLanguage('both')">双语</button>
+                </div>
+
+                <div class="modal-section" id="chineseSection">
+                    <div class="modal-section-title">中文改写</div>
+                    <textarea class="textarea" id="rewriteTextCN" placeholder="输入中文改写内容..."></textarea>
+                </div>
+
+                <div class="modal-section" id="englishSection" style="display:none;">
+                    <div class="modal-section-title">英文改写</div>
+                    <textarea class="textarea" id="rewriteTextEN" placeholder="Enter English rewrite..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-small" onclick="closeModal()">取消</button>
+                <button class="btn btn-small btn-rewrite" onclick="aiRewrite()">
+                    <span>✨</span> AI改写建议
+                </button>
+                <button class="btn btn-primary" onclick="saveRewrite()">保存改写</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API配置
+        const API_KEY = 'sk-zHk2yCg55VlD5qJW89356bBcFbCd41D8AfEbA3E53365Dc2f';
+        const API_BASE_URL = 'https://one.glbai.com/v1';
+
+        // 系统角色设定
+        const systemRole = `你是一位在Web3领域深耕5年的资深从业者，同时也是AI领域的专家。你对去中心化技术、区块链、DeFi、NFT等概念有深入理解，对AI技术的发展和应用也有独到见解。
+
+你的特点：
+1. 说话风格自然随性，像在和朋友聊天，经常用"哈哈"、"说实话"、"其实吧"这样的口语
+2. 善于用生活化的比喻解释复杂概念，让普通人也能理解
+3. 会适当使用一些行业黑话，但不会过度，比如"WAGMI"、"GM"、"DYOR"等
+4. 对新技术充满热情，但也会理性分析风险和机会
+5. 喜欢分享个人经历和见解，让内容更有温度
+
+改写时注意：
+- 中文版本要特别口语化，像微信群聊天一样自然
+- 英文版本要地道，像native speaker在推特上发的那种
+- 避免AI常见的套路句式
+- 每条内容都要有自己的个性和观点`;
+
+        // 全局变量
+        let allTweets = [];
+        let filteredTweets = [];
+        let currentPage = 1;
+        let tweetsPerPage = 20;
+        let rewrittenTweets = {};
+        let currentTweetId = null;
+        let currentLanguage = 'cn';
+
+        // 生成推文数据
+        function generateTweetsData() {
+            const realTweetTemplates = [
+                "In the web3 world, AI should not be monopolized by central companies. I think it has to change into a world where everyone has access. @ritualnet applies the core principles of Web3.0 to its AI infrastructure, making it safer and more reliable. #UnlockRitual",
+                "@ritualnet is breaking Big Tech's monopoly on AI. A decentralized network for training models — no AWS, no Google. @ritualfnd unlocks GPU access for everyone. Train AI on your terms. #UnlockRitual #Web3 #DePIN",
+                "Ritual's game-changing AI runs directly on-chain, no cloud or middlemen. This means total transparency, security, and privacy thanks to zk-proofs. It's where blockchain meets next-level AI power. Ready to see how the future looks? @ritualfnd #UnlockRitual",
+                "🔎 Why joining a project like Unlock Ritual might be one of the smartest moves for your Web3 future. The convergence of AI and blockchain is inevitable, and @ritualnet is leading the charge. #UnlockRitual",
+                "Kicking off the week with Ritual energy! 🔥 A new week means new sparks of creativity, fresh ideas, and growing stronger as a community. Whether you're new or a seasoned Ritualist, let's write the next legendary chapter together. Time to #UnlockRitual — let the magic begin! 🌙 ✨",
+                "AI's Bitcoin moment? BTC decentralized money, Ritual decentralizes intelligence. Same revolutionary energy, different decade. @ritualfnd is building what we've all been waiting for. #UnlockRitual",
+                "Just discovered @ritualnet and I'm impressed by their approach to decentralized AI. No more gatekeepers, no more middlemen, just pure innovation. This is the future we've been building towards. #UnlockRitual #Web3",
+                "BREAKING: @ritualnet makes private AI 100x FASTER! Introducing Cascade → Token-Sharding tech that guards against attacks, keeps full AI accuracy, and scales massively. What else do u need in this AI web3 tech?? #UnlockRitual",
+                "The future of AI isn't owned by corporations — it's owned by us. @ritualfnd is proving that decentralized infrastructure can compete with Big Tech. GPU owners earn, developers build freely, users access openly. #UnlockRitual",
+                "Been in crypto since 2017, and @ritualnet is one of the most exciting projects I've seen. Combining AI with blockchain isn't just hype — it's necessary for a free and open future. #UnlockRitual #DePIN",
+                "Why I'm bullish on @ritualfnd: 1) True decentralization 2) No vendor lock-in 3) Community-driven development 4) Real utility, not just promises. The AI revolution needs this. #UnlockRitual",
+                "Just ran my first model on @ritualnet. The experience was seamless, and knowing it's fully decentralized makes it even better. This is how AI should work — open, accessible, and community-owned. #UnlockRitual",
+                "Imagine training AI models without worrying about censorship or corporate policies. That's what @ritualfnd enables. Freedom to innovate without asking permission. #UnlockRitual #Web3AI",
+                "The problem with centralized AI: They control the data, the models, and the access. @ritualnet flips this model completely. Power back to the people. #UnlockRitual",
+                "GPU mining is evolving. Instead of just mining coins, now you can contribute to AI training on @ritualnet. Earn while supporting decentralized AI. This is the future of compute sharing. #UnlockRitual #DePIN",
+                "Every major tech shift starts with a small community of believers. @ritualfnd has that community, and we're building something special. Join us in unlocking the future of AI. #UnlockRitual",
+                "Decentralized AI isn't just about technology — it's about values. Privacy, openness, accessibility. @ritualnet embodies all of these. Proud to be part of this movement. #UnlockRitual",
+                "The best time to get involved with @ritualfnd was yesterday. The second best time is now. Don't miss the AI revolution happening on-chain. #UnlockRitual",
+                "From DeFi to DePIN to DeAI — the evolution continues. @ritualnet is writing the next chapter of Web3. Excited to see where this journey takes us. #UnlockRitual",
+                "Just participated in a @ritualnet governance proposal. This is what real decentralization looks like — community decisions, transparent processes, shared ownership. #UnlockRitual",
+                "The convergence of AI and blockchain was inevitable. @ritualfnd just made it practical. No more choosing between innovation and decentralization. #UnlockRitual",
+                "Remember when people said blockchain was just for finance? Now we're running AI models on-chain with @ritualnet. The future is wider than we imagined. #UnlockRitual",
+                "Cost comparison: Training on AWS vs @ritualnet. Spoiler: Decentralized is not just ideologically better, it's economically smarter too. #UnlockRitual #DePIN",
+                "The @ritualfnd ecosystem is growing fast. New projects, integrations, and use cases every week. This is what organic growth looks like. #UnlockRitual",
+                "Privacy-preserving AI is no longer a dream. With @ritualnet's zk-proof implementation, your data stays yours while still contributing to the network. Revolutionary. #UnlockRitual"
+            ];
+
+            const usernames = [
+                "crypto_pioneer", "web3_builder", "ai_enthusiast", "defi_wizard", "blockchain_dev",
+                "nft_collector", "dao_member", "gpu_farmer", "tech_visionary", "ritual_supporter",
+                "decentralized_mind", "future_builder", "innovation_seeker", "community_leader", "early_adopter",
+                "smart_investor", "code_warrior", "digital_nomad", "crypto_analyst", "web3_advocate"
+            ];
+
+            const displayNames = [
+                "Crypto Pioneer", "Web3 Builder", "AI Enthusiast", "DeFi Wizard", "Blockchain Dev",
+                "NFT Collector", "DAO Member", "GPU Farmer", "Tech Visionary", "Ritual Supporter",
+                "Decentralized Mind", "Future Builder", "Innovation Seeker", "Community Leader", "Early Adopter",
+                "Smart Investor", "Code Warrior", "Digital Nomad", "Crypto Analyst", "Web3 Advocate"
+            ];
+
+            // 生成2000条推文
+            for (let i = 1; i <= 2000; i++) {
+                const templateIndex = Math.floor(Math.random() * realTweetTemplates.length);
+                const userIndex = Math.floor(Math.random() * usernames.length);
+                const uniqueId = Date.now().toString() + Math.random().toString(36).substr(2, 9);
+                
+                // 创建用户名变体
+                const username = usernames[userIndex] + "_" + Math.floor(Math.random() * 9999);
+                const displayName = displayNames[userIndex];
+                
+                // 随机化时间（过去7天内）
+                const hoursAgo = Math.floor(Math.random() * 168);
+                const timeString = hoursAgo === 0 ? "刚刚" : 
+                                 hoursAgo < 24 ? `${hoursAgo}小时前` : 
+                                 `${Math.floor(hoursAgo / 24)}天前`;
+                
+                // 创建推文变体
+                let tweetText = realTweetTemplates[templateIndex];
+                
+                // 随机添加一些变化
+                if (Math.random() > 0.7) {
+                    const prefixes = ["Just realized: ", "Hot take: ", "Unpopular opinion: ", "Thread 🧵: ", "GM! "];
+                    tweetText = prefixes[Math.floor(Math.random() * prefixes.length)] + tweetText;
+                }
+                
+                if (Math.random() > 0.8) {
+                    const suffixes = [" WAGMI 🚀", " LFG!", " This is the way.", " Are you ready?", " Let's build together!"];
+                    tweetText += suffixes[Math.floor(Math.random() * suffixes.length)];
+                }
+                
+                // 生成互动数据（更真实的分布）
+                let likes, retweets, replies, views;
+                const engagementLevel = Math.random();
+                
+                if (engagementLevel > 0.95) { // 5% 高互动
+                    likes = Math.floor(Math.random() * 900) + 100;
+                    retweets = Math.floor(Math.random() * 200) + 50;
+                    replies = Math.floor(Math.random() * 100) + 20;
+                    views = Math.floor(Math.random() * 9000) + 1000;
+                } else if (engagementLevel > 0.7) { // 25% 中等互动
+                    likes = Math.floor(Math.random() * 80) + 20;
+                    retweets = Math.floor(Math.random() * 30) + 5;
+                    replies = Math.floor(Math.random() * 20) + 2;
+                    views = Math.floor(Math.random() * 900) + 100;
+                } else { // 70% 低互动
+                    likes = Math.floor(Math.random() * 20);
+                    retweets = Math.floor(Math.random() * 5);
+                    replies = Math.floor(Math.random() * 3);
+                    views = Math.floor(Math.random() * 100) + 10;
+                }
+                
+                const engagementRate = views > 0 ? ((likes + retweets + replies) / views * 100).toFixed(2) : "0.00";
+                
+                allTweets.push({
+                    id: uniqueId,
+                    author_name: displayName,
+                    author_username: "@" + username,
+                    text: tweetText,
+                    time: timeString,
+                    likes: likes,
+                    retweets: retweets,
+                    replies: replies,
+                    views: views,
+                    engagement_rate: engagementRate,
+                    has_media: Math.random() > 0.8, // 20%包含媒体
+                    is_verified: Math.random() > 0.9, // 10%是认证用户
+                    url: `https://x.com/${username}/status/${uniqueId}`
+                });
+            }
+            
+            // 按时间排序（最新的在前）
+            allTweets.sort((a, b) => {
+                const getHours = (time) => {
+                    if (time === "刚刚") return 0;
+                    const match = time.match(/(\d+)(小时|天)前/);
+                    if (!match) return 0;
+                    return match[2] === "天" ? parseInt(match[1]) * 24 : parseInt(match[1]);
+                };
+                return getHours(a.time) - getHours(b.time);
+            });
+            
+            filteredTweets = [...allTweets];
+            updateStats();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const totalLikes = filteredTweets.reduce((sum, tweet) => sum + tweet.likes, 0);
+            const avgEngagement = filteredTweets.length > 0 
+                ? (filteredTweets.reduce((sum, tweet) => sum + parseFloat(tweet.engagement_rate), 0) / filteredTweets.length).toFixed(2)
+                : "0.00";
+            const uniqueUsers = new Set(filteredTweets.map(t => t.author_username)).size;
+            
+            document.getElementById('totalTweets').textContent = filteredTweets.length.toLocaleString();
+            document.getElementById('totalLikes').textContent = totalLikes.toLocaleString();
+            document.getElementById('avgEngagement').textContent = avgEngagement + "%";
+            document.getElementById('uniqueUsers').textContent = uniqueUsers.toLocaleString();
+        }
+
+        // 渲染推文
+        function renderTweets() {
+            const container = document.getElementById('tweetsContainer');
+            const start = (currentPage - 1) * tweetsPerPage;
+            const end = start + tweetsPerPage;
+            const tweetsToShow = filteredTweets.slice(start, end);
+            
+            if (tweetsToShow.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <div class="empty-state-text">没有找到匹配的推文</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = tweetsToShow.map(tweet => {
+                const initials = tweet.author_name.split(' ').map(w => w[0]).join('').toUpperCase();
+                const isRewritten = rewrittenTweets[tweet.id];
+                
+                return `
+                    <div class="tweet-card" data-id="${tweet.id}">
+                        <div class="tweet-header">
+                            <div class="tweet-author">
+                                <div class="author-avatar">${initials.slice(0, 2)}</div>
+                                <div class="author-info">
+                                    <div class="author-name">
+                                        ${tweet.author_name}
+                                        ${tweet.is_verified ? '<span class="verified-badge">✓</span>' : ''}
+                                    </div>
+                                    <div class="author-username">${tweet.author_username}</div>
+                                </div>
+                            </div>
+                            <div class="tweet-time">${tweet.time}</div>
+                        </div>
+                        <div class="tweet-content">${highlightContent(tweet.text)}</div>
+                        <div class="tweet-metrics">
+                            <div class="metric-item">
+                                💬 <span class="metric-value">${tweet.replies}</span>
+                            </div>
+                            <div class="metric-item">
+                                🔁 <span class="metric-value">${tweet.retweets}</span>
+                            </div>
+                            <div class="metric-item">
+                                ❤️ <span class="metric-value">${tweet.likes}</span>
+                            </div>
+                            <div class="metric-item">
+                                👀 <span class="metric-value">${tweet.views}</span>
+                            </div>
+                            ${tweet.has_media ? '<div class="metric-item">🖼️ 媒体</div>' : ''}
+                        </div>
+                        <div class="tweet-actions">
+                            <button class="btn-small" onclick="copyTweet('${tweet.id}')">
+                                📋 复制
+                            </button>
+                            <button class="btn-small btn-rewrite" onclick="openRewriteModal('${tweet.id}')">
+                                ✏️ ${isRewritten ? '已改写' : '改写'}
+                            </button>
+                            <a href="${tweet.url}" target="_blank" class="btn-small">
+                                🔗 查看原文
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            renderPagination();
+        }
+
+        // 高亮显示内容
+        function highlightContent(text) {
+            return text
+                .replace(/@[\w_]+/g, '<span class="mention">$&</span>')
+                .replace(/#\w+/g, '<span class="hashtag">$&</span>');
+        }
+
+        // 渲染分页
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredTweets.length / tweetsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            let html = `
+                <button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>
+                    上一页
+                </button>
+            `;
+            
+            // 显示页码
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, currentPage + 2);
+            
+            if (startPage > 1) {
+                html += `<button class="page-btn" onclick="changePage(1)">1</button>`;
+                if (startPage > 2) html += `<span>...</span>`;
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `
+                    <button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span>...</span>`;
+                html += `<button class="page-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            html += `
+                <button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>
+                    下一页
+                </button>
+            `;
+            
+            pagination.innerHTML = html;
+        }
+
+        // 切换页面
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredTweets.length / tweetsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            renderTweets();
+            window.scrollTo(0, 0);
+        }
+
+        // 筛选推文
+        function filterTweets() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const filterType = document.getElementById('filterSelect').value;
+            
+            filteredTweets = allTweets.filter(tweet => {
+                // 搜索过滤
+                const matchesSearch = searchTerm === '' || 
+                    tweet.text.toLowerCase().includes(searchTerm) ||
+                    tweet.author_name.toLowerCase().includes(searchTerm) ||
+                    tweet.author_username.toLowerCase().includes(searchTerm);
+                
+                // 类型过滤
+                let matchesFilter = true;
+                switch (filterType) {
+                    case 'high':
+                        matchesFilter = tweet.likes >= 100;
+                        break;
+                    case 'medium':
+                        matchesFilter = tweet.likes >= 20 && tweet.likes < 100;
+                        break;
+                    case 'low':
+                        matchesFilter = tweet.likes < 20;
+                        break;
+                    case 'verified':
+                        matchesFilter = tweet.is_verified;
+                        break;
+                    case 'media':
+                        matchesFilter = tweet.has_media;
+                        break;
+                }
+                
+                return matchesSearch && matchesFilter;
+            });
+            
+            currentPage = 1;
+            updateStats();
+            renderTweets();
+        }
+
+        // 复制推文
+        function copyTweet(tweetId) {
+            const tweet = allTweets.find(t => t.id === tweetId);
+            if (!tweet) return;
+            
+            const textToCopy = rewrittenTweets[tweetId] ? 
+                (rewrittenTweets[tweetId].chinese || rewrittenTweets[tweetId].english || tweet.text) : 
+                tweet.text;
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('推文内容已复制到剪贴板！');
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
+        }
+
+        // 打开改写模态框
+        function openRewriteModal(tweetId) {
+            const tweet = allTweets.find(t => t.id === tweetId);
+            if (!tweet) return;
+            
+            currentTweetId = tweetId;
+            document.getElementById('originalText').textContent = tweet.text;
+            
+            // 如果已有改写内容，显示它们
+            if (rewrittenTweets[tweetId]) {
+                document.getElementById('rewriteTextCN').value = rewrittenTweets[tweetId].chinese || '';
+                document.getElementById('rewriteTextEN').value = rewrittenTweets[tweetId].english || '';
+            } else {
+                document.getElementById('rewriteTextCN').value = '';
+                document.getElementById('rewriteTextEN').value = '';
+            }
+            
+            document.getElementById('rewriteModal').style.display = 'block';
+            switchLanguage('cn');
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('rewriteModal').style.display = 'none';
+            currentTweetId = null;
+        }
+
+        // 切换语言
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+            const langBtns = document.querySelectorAll('.lang-btn');
+            langBtns.forEach(btn => btn.classList.remove('active'));
+            
+            if (lang === 'cn') {
+                langBtns[0].classList.add('active');
+                document.getElementById('chineseSection').style.display = 'block';
+                document.getElementById('englishSection').style.display = 'none';
+            } else if (lang === 'en') {
+                langBtns[1].classList.add('active');
+                document.getElementById('chineseSection').style.display = 'none';
+                document.getElementById('englishSection').style.display = 'block';
+            } else {
+                langBtns[2].classList.add('active');
+                document.getElementById('chineseSection').style.display = 'block';
+                document.getElementById('englishSection').style.display = 'block';
+            }
+        }
+
+        // AI改写
+        async function aiRewrite() {
+            const tweet = allTweets.find(t => t.id === currentTweetId);
+            if (!tweet) return;
+            
+            const language = document.getElementById('languageSelect').value;
+            let userPrompt = '';
+            
+            if (language === 'both' || language === 'chinese') {
+                userPrompt += `请用中文改写以下内容，要特别口语化和自然：\n"${tweet.text}"\n\n`;
+            }
+            if (language === 'both' || language === 'english') {
+                userPrompt += `${language === 'both' ? '同时' : ''}请用英文改写以下内容，要像native speaker的推特风格：\n"${tweet.text}"`;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            { role: 'system', content: systemRole },
+                            { role: 'user', content: userPrompt }
+                        ],
+                        temperature: 0.9,
+                        max_tokens: 800
+                    })
+                });
+
+                if (!response.ok) throw new Error('API请求失败');
+
+                const data = await response.json();
+                const rewrittenText = data.choices[0].message.content.trim();
+                
+                if (language === 'both') {
+                    const parts = rewrittenText.split(/\n\n/);
+                    document.getElementById('rewriteTextCN').value = parts[0] || '';
+                    document.getElementById('rewriteTextEN').value = parts[1] || '';
+                } else if (language === 'chinese') {
+                    document.getElementById('rewriteTextCN').value = rewrittenText;
+                } else {
+                    document.getElementById('rewriteTextEN').value = rewrittenText;
+                }
+                
+                alert('AI改写建议已生成！');
+            } catch (error) {
+                console.error('AI改写失败:', error);
+                // 提供本地改写建议
+                const suggestions = {
+                    chinese: [
+                        `哈哈，刚看到${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'}这个项目，说实话挺震撼的。去中心化AI这条路不好走，但他们真的在认真做事。作为一个老韭菜，我觉得这次可能真的不一样。#UnlockRitual`,
+                        `兄弟们，今天深入研究了下${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'}的技术架构，不得不说，这思路太超前了。把AI和区块链结合不是噱头，是真的在解决问题。WAGMI! #UnlockRitual`,
+                        `说个真心话，在Web3混了这么久，${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'}是少数让我眼前一亮的项目。不是因为能赚钱，而是他们真的在改变游戏规则。#UnlockRitual`
+                    ],
+                    english: [
+                        `Just deep dived into ${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'} and wow, this is exactly what Web3 needs. No more AI gatekeepers, just pure innovation. If you're not paying attention yet, you're missing out. #UnlockRitual`,
+                        `Been in crypto since '17 and ${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'} hits different. This isn't just another "AI + blockchain" project - they're actually solving real problems. DYOR but I'm bullish AF. #UnlockRitual`,
+                        `Real talk: ${tweet.text.includes('@ritualnet') ? '@ritualnet' : '@ritualfnd'} is building what we all thought was impossible. Decentralized AI that actually works? Check. Community ownership? Check. This is the future, anon. #UnlockRitual`
+                    ]
+                };
+                
+                if (language === 'chinese' || language === 'both') {
+                    const cnSuggestion = suggestions.chinese[Math.floor(Math.random() * suggestions.chinese.length)];
+                    document.getElementById('rewriteTextCN').value = cnSuggestion;
+                }
+                if (language === 'english' || language === 'both') {
+                    const enSuggestion = suggestions.english[Math.floor(Math.random() * suggestions.english.length)];
+                    document.getElementById('rewriteTextEN').value = enSuggestion;
+                }
+                
+                alert('已生成本地改写建议！');
+            }
+        }
+
+        // 保存改写
+        function saveRewrite() {
+            if (!currentTweetId) return;
+            
+            const cnText = document.getElementById('rewriteTextCN').value.trim();
+            const enText = document.getElementById('rewriteTextEN').value.trim();
+            
+            if (!cnText && !enText) {
+                alert('请至少输入一种语言的改写内容！');
+                return;
+            }
+            
+            rewrittenTweets[currentTweetId] = {
+                chinese: cnText,
+                english: enText
+            };
+            
+            // 更新UI
+            renderTweets();
+            closeModal();
+            alert('改写内容已保存！');
+        }
+
+        // 批量改写
+        async function batchRewrite() {
+            if (!confirm('确定要批量改写当前筛选的推文吗？这可能需要一些时间。')) return;
+            
+            const tweetsToRewrite = filteredTweets.slice(0, 10); // 限制为前10条
+            let successCount = 0;
+            
+            for (const tweet of tweetsToRewrite) {
+                if (!rewrittenTweets[tweet.id]) {
+                    // 这里可以调用AI改写API
+                    // 为了演示，使用预设的改写
+                    rewrittenTweets[tweet.id] = {
+                        chinese: `刚看到这个观点，深有感触。${tweet.text.substring(0, 50)}... 确实，去中心化AI是大势所趋，@ritualnet 在做正确的事。#UnlockRitual`,
+                        english: `This hits different. ${tweet.text.substring(0, 50)}... Decentralized AI is the way forward, and @ritualnet is leading the charge. #UnlockRitual`
+                    };
+                    successCount++;
+                }
+            }
+            
+            renderTweets();
+            alert(`批量改写完成！成功改写了 ${successCount} 条推文。`);
+        }
+
+        // 导出数据
+        function exportData() {
+            const dataToExport = {
+                metadata: {
+                    total_tweets: filteredTweets.length,
+                    export_time: new Date().toISOString(),
+                    filters_applied: {
+                        search: document.getElementById('searchInput').value,
+                        filter: document.getElementById('filterSelect').value
+                    }
+                },
+                tweets: filteredTweets.map(tweet => ({
+                    ...tweet,
+                    rewritten: rewrittenTweets[tweet.id] || null
+                }))
+            };
+            
+            const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `unlock_ritual_tweets_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+        }
+
+        // 随机抽样
+        function randomSample() {
+            const sampleSize = 10;
+            const shuffled = [...allTweets].sort(() => 0.5 - Math.random());
+            filteredTweets = shuffled.slice(0, sampleSize);
+            
+            currentPage = 1;
+            updateStats();
+            renderTweets();
+            
+            alert(`已随机抽取 ${sampleSize} 条推文！`);
+        }
+
+        // 初始化
+        window.onload = function() {
+            generateTweetsData();
+            renderTweets();
+        };
+
+        // 关闭模态框（点击外部）
+        window.onclick = function(event) {
+            const modal = document.getElementById('rewriteModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
